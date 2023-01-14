@@ -559,7 +559,10 @@ namespace Needle.HybridPackages
                         
                         var fullPath = Path.GetFullPath(root);
                         CollectIgnoreFiles(root);
-                        
+
+                        // add all files in this directory
+                        AddFiles(new DirectoryInfo(root).GetFiles("*", SearchOption.AllDirectories), fullPath, root);
+
                         // include all hidden directories (end with ~)
                         foreach (var directory in new DirectoryInfo(root).GetDirectories("*", SearchOption.AllDirectories))
                         {
@@ -576,36 +579,10 @@ namespace Needle.HybridPackages
                                 if (directory.Name.EndsWith("~", StringComparison.Ordinal))
                                 {
                                     // add all files in this directory
-                                    foreach (var file in directory.GetFiles("*", SearchOption.AllDirectories))
-                                    {
-                                        if(defaultNpmIgnore.Contains(file.Name))
-                                            continue;
-                                        
-                                        if (file.Extension.EndsWith(".meta", StringComparison.OrdinalIgnoreCase))
-                                            continue;
-
-                                        if (currentUploadConfig && currentUploadConfig.respectIgnoreFiles && IsIgnored(file.FullName))
-                                            continue;
-
-                                        var projectRelativePath = file.FullName.Replace(fullPath, root);
-                                        exportPaths.Add(projectRelativePath);
-                                    }
+                                    AddFiles(directory.GetFiles("*", SearchOption.AllDirectories), fullPath, root, false);
                                 } else {
                                     // add all files in this directory
-                                    /*foreach (var file in directory.GetFiles("*", SearchOption.AllDirectories)) {
-                                        Debug.Log("skipping: " + file.FullName);
-                                    }*/
-                                    // add all files in this directory
-                                    foreach (var file in directory.GetFiles("*", SearchOption.AllDirectories)) {
-                                        if (defaultNpmIgnore.Contains(file.Name))
-                                            continue;
-
-                                        if (currentUploadConfig && currentUploadConfig.respectIgnoreFiles && IsIgnored(file.FullName))
-                                            continue;
-
-                                        var projectRelativePath = file.FullName.Replace(fullPath, root);
-                                        exportPaths.Add(projectRelativePath);
-                                    }
+                                    AddFiles(directory.GetFiles("*", SearchOption.AllDirectories), fullPath, root);
                                 }
                             }
                             catch (IOException)
@@ -615,6 +592,23 @@ namespace Needle.HybridPackages
                         }
                         
                         Profiler.EndSample();
+                    }
+
+                    void AddFiles(FileInfo[] files, string fullPath, string root, bool allowMetaFiles = true) {
+
+                        foreach (var file in files) {
+                            if (defaultNpmIgnore.Contains(file.Name))
+                                continue;
+
+                            if (!allowMetaFiles &&file.Extension.EndsWith(".meta", StringComparison.OrdinalIgnoreCase))
+                                continue;
+
+                            if (currentUploadConfig && currentUploadConfig.respectIgnoreFiles && IsIgnored(file.FullName))
+                                continue;
+
+                            var projectRelativePath = file.FullName.Replace(fullPath, root);
+                            exportPaths.Add(projectRelativePath);
+                        }
                     }
                     
                     // Debug.Log("<b>" + fileName + "</b>" + "\n" + string.Join("\n", exportPaths));
