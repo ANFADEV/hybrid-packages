@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,9 +42,7 @@ namespace Needle.HybridPackages
             
             if(path.StartsWith("Packages/", StringComparison.Ordinal))
             {
-                path = path.Substring("Packages/".Length);
-                var indexOfSlash = path.IndexOf("/", StringComparison.Ordinal);
-                var packageName = path.Substring(0, indexOfSlash);
+                string packageName = GetPackageName(path);
                 path = "Packages/" + packageName;
                 
                 if(!Unsupported.IsDeveloperMode())
@@ -62,17 +61,33 @@ namespace Needle.HybridPackages
 
             return obj;
         }
+
+        public string GetPackageName (string path) {
+            path = path.Substring("Packages/".Length);
+            var indexOfSlash = path.IndexOf("/", StringComparison.Ordinal);
+            return path.Substring(0, indexOfSlash);
+        }
         
-        public string GetExportFilename(string outputSubFolder)
+        public string GetExportFilename(string outputSubFolder, string packagePath = null)
         {
             if (!this) return null;
-            return outputSubFolder+"/HybridPackage_" + Path.GetDirectoryName(AssetDatabase.GetAssetPath(this))
+
+            if (items.Count > 0)
+            {
+                string name = AssetDatabase.GetAssetPath(items[0]).Split('.').Where(s => s != "com").Aggregate((a, b) => $"{a}_{b}");
+                return outputSubFolder + "/HybridPackage_" + GetPackageName(name) + ".unitypackage";
+            }
+            else
+            {
+                return outputSubFolder+"/HybridPackage_" + Path.GetDirectoryName(AssetDatabase.GetAssetPath(this))
                        .Replace("\\", "/")
                        .Replace("Assets/", "")
                        .Replace("Packages/", "")
                        .Replace("/", "_")
                        .Trim('_')
                    + ".unitypackage";
+            }
+
         }
     }
 
