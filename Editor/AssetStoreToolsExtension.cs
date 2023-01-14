@@ -431,14 +431,15 @@ namespace Needle.HybridPackages
 
                     // all the currently selected files from AssetDB should be exported anyways
                     var assetDatabasePaths = guids.Select(AssetDatabase.GUIDToAssetPath).ToList();
-                    foreach (var p in assetDatabasePaths)
-                        exportPaths.Add(p);
+                    //foreach (var p in assetDatabasePaths)
+                    //    exportPaths.Add(p);
 
                     foreach (var path0 in assetDatabasePaths)
                     {
                         var path = path0;
-                        if (!path.StartsWith("Packages/", StringComparison.Ordinal)) continue;
-                        
+                        if (!path.StartsWith("Packages/", StringComparison.Ordinal))
+                            continue;
+
                         path = path.Substring("Packages/".Length);
                         var indexOfSlash = path.IndexOf("/", StringComparison.Ordinal);
                         var packageName = path.Substring(0, indexOfSlash);
@@ -584,7 +585,24 @@ namespace Needle.HybridPackages
                                         if (file.Extension.EndsWith(".meta", StringComparison.OrdinalIgnoreCase))
                                             continue;
 
-                                        if (currentUploadConfig && currentUploadConfig.respectIgnoreFiles && IsIgnored(file.FullName)) continue;
+                                        if (currentUploadConfig && currentUploadConfig.respectIgnoreFiles && IsIgnored(file.FullName))
+                                            continue;
+
+                                        var projectRelativePath = file.FullName.Replace(fullPath, root);
+                                        exportPaths.Add(projectRelativePath);
+                                    }
+                                } else {
+                                    // add all files in this directory
+                                    /*foreach (var file in directory.GetFiles("*", SearchOption.AllDirectories)) {
+                                        Debug.Log("skipping: " + file.FullName);
+                                    }*/
+                                    // add all files in this directory
+                                    foreach (var file in directory.GetFiles("*", SearchOption.AllDirectories)) {
+                                        if (defaultNpmIgnore.Contains(file.Name))
+                                            continue;
+
+                                        if (currentUploadConfig && currentUploadConfig.respectIgnoreFiles && IsIgnored(file.FullName))
+                                            continue;
 
                                         var projectRelativePath = file.FullName.Replace(fullPath, root);
                                         exportPaths.Add(projectRelativePath);
