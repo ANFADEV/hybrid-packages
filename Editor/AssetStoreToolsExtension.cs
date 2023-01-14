@@ -488,8 +488,7 @@ namespace Needle.HybridPackages
                         var upwardsIgnoreFiles = new List<(string, Ignore)>();
                         bool folderIsInsideGitRepository = false;
 
-                        try
-                        {
+                        /*try {
                             // find ignore files up to directory root or until a .git folder is found
                             while (di.Parent != null)
                             {
@@ -516,8 +515,8 @@ namespace Needle.HybridPackages
                         // if we found any upwards git folder we add those ignore files to our list here, otherwise
                         // let's assume this isn't inside a git repo and we shouldn't look at those.
                         if (folderIsInsideGitRepository)
-                            ignoreFiles.AddRange(upwardsIgnoreFiles);
-                        
+                            ignoreFiles.AddRange(upwardsIgnoreFiles);*/
+
                         Profiler.EndSample();
                     }
                     
@@ -625,9 +624,12 @@ namespace Needle.HybridPackages
                     var dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/Unity/AssetStoreTools/Export";
 
                     var guidToFile = new Dictionary<string, string>();
-                    foreach(var path in exportPaths.OrderByDescending(x => AssetDatabase.GetMainAssetTypeAtPath(x) != null))
-                        UnitypackageExporter.AddToUnityPackage(path, dir, ref guidToFile);
-                    
+                    foreach (var path in exportPaths.OrderByDescending(x => AssetDatabase.GetMainAssetTypeAtPath(x) != null)) {
+                        try {
+                            UnitypackageExporter.AddToUnityPackage(path, dir, ref guidToFile);
+                        } catch (Exception) { }
+                    }
+
                     var compressionStrength = currentUploadConfig ? currentUploadConfig.compressionStrength : Zipper.CompressionStrength.Normal;
                     if (!Zipper.TryCreateTgz(dir, fileName, compressionStrength))
                     {
