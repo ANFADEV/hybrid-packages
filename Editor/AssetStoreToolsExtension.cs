@@ -485,10 +485,10 @@ namespace Needle.HybridPackages
                         AddToIgnore(ignoreFiles, ".gitignore", SearchOption.AllDirectories);
                         AddToIgnore(ignoreFiles, ".npmignore", SearchOption.AllDirectories);
 
-                        var upwardsIgnoreFiles = new List<(string, Ignore)>();
+                        /*var upwardsIgnoreFiles = new List<(string, Ignore)>();
                         bool folderIsInsideGitRepository = false;
 
-                        /*try {
+                        try {
                             // find ignore files up to directory root or until a .git folder is found
                             while (di.Parent != null)
                             {
