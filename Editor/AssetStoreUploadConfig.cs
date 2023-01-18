@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -70,23 +71,36 @@ namespace Needle.HybridPackages
         
         public string GetExportFilename(string outputSubFolder, string packagePath = null)
         {
-            if (!this) return null;
+            if (!this)
+                return null;
 
-            if (items.Count > 0)
-            {
-                string name = AssetDatabase.GetAssetPath(items[0]).Split('.').Where(s => s != "com").Aggregate((a, b) => $"{a}_{b}");
-                return outputSubFolder + "/HybridPackage_" + GetPackageName(name) + ".unitypackage";
-            }
-            else
-            {
-                return outputSubFolder+"/HybridPackage_" + Path.GetDirectoryName(AssetDatabase.GetAssetPath(this))
-                       .Replace("\\", "/")
-                       .Replace("Assets/", "")
-                       .Replace("Packages/", "")
-                       .Replace("/", "_")
-                       .Trim('_')
-                   + ".unitypackage";
-            }
+            // Name using the config asset's name
+            string name = this.name;
+            if (this.name.Contains("Asset Store Upload Config"))
+                name = this.name.Remove(this.name.IndexOf("Asset Store Upload Config"), 25);
+
+            return outputSubFolder + "/" + name.Trim() + "_HybridPackage.unitypackage";
+
+            // if (items.Count > 0)
+
+            // Name using the first item's package name
+            // {
+            //     string name = AssetDatabase.GetAssetPath(items[0]).Split('.').Where(s => s != "com").Aggregate((a, b) => $"{a}_{b}");
+            //     return outputSubFolder + "/HybridPackage_" + GetPackageName(name) + ".unitypackage";
+            // }
+            
+            // else
+
+            // Name using the config asset's path (old)
+            // {
+            //     return outputSubFolder+"/HybridPackage_" + Path.GetDirectoryName(AssetDatabase.GetAssetPath(this))
+            //            .Replace("\\", "/")
+            //            .Replace("Assets/", "")
+            //            .Replace("Packages/", "")
+            //            .Replace("/", "_")
+            //            .Trim('_')
+            //        + ".unitypackage";
+            // }
 
         }
     }
