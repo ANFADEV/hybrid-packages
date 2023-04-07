@@ -561,10 +561,10 @@ namespace Needle.HybridPackages
                         CollectIgnoreFiles(root);
 
                         // add all files in this directory
-                        AddFiles(new DirectoryInfo(root).GetFiles("*", SearchOption.AllDirectories), fullPath, root);
+                        AddFiles(new DirectoryInfo(root).GetFiles("*", SearchOption.TopDirectoryOnly), fullPath, root);
 
                         // include all hidden directories (end with ~)
-                        foreach (var directory in new DirectoryInfo(root).GetDirectories("*", SearchOption.AllDirectories))
+                        foreach (var directory in new DirectoryInfo(root).GetDirectories("*", SearchOption.TopDirectoryOnly))
                         {
                             try
                             {
@@ -600,7 +600,11 @@ namespace Needle.HybridPackages
                             if (defaultNpmIgnore.Contains(file.Name))
                                 continue;
 
-                            if (!allowMetaFiles &&file.Extension.EndsWith(".meta", StringComparison.OrdinalIgnoreCase))
+                            if (file.Extension.EndsWith(".gitignore", StringComparison.OrdinalIgnoreCase) || 
+                                file.Extension.EndsWith(".npmignore", StringComparison.OrdinalIgnoreCase))
+                                continue;
+
+                            if (!allowMetaFiles && file.Extension.EndsWith(".meta", StringComparison.OrdinalIgnoreCase))
                                 continue;
 
                             if (currentUploadConfig && currentUploadConfig.respectIgnoreFiles && IsIgnored(file.FullName))
